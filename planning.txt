@@ -1,0 +1,75 @@
+memoryTableQuiz
+
+dataBase
+
+drop table memoryMeta;
+create table memoryMeta(
+    	uuid int PRIMARY KEY NOT NULL AUTO_INCREMENT ,
+    	chapter int,
+    	figure varchar(20),
+    	description varchar(150),
+    	value0Label varchar(20),
+    	value1Label varchar(20),
+    	value2Label varchar(20),
+    	value3Label varchar(20));
+drop table memoryEntries;
+create table memoryEntries(
+		uuid int PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    	figure varchar(20),
+    	value0 varchar(100),
+    	value1 varchar(100),
+    	value2 varchar(100),
+    	value3 varchar(100));
+
+
+metaData input-
+	-takes data
+	-validates data
+	-submits data to create the metadata table
+--
+Submit button
+--
+	chapter,figure,description,value0Label,value1Label,value2Label*,value3Label*
+	-->validateMetadataInput-->{chapter:chapter,figure:figure...}? false
+		-->API function: transmitMetadata params:{chapter:chapter,figure:figure...}
+			-->backend function submitData --> completion message 
+				-->dbOperation 'INSERT INTO memoryMeta values(?,?,?,?,?,?,?)'
+					params("issssss",chapter,figure,description,value0Label,value1Label,value2Label*,value3Label)
+Edit interface
+	-edit tool displays available metadata charts as buttons
+	-button summons the metadata and the data editing chart
+----
+Metadata-Button
+----
+	figure
+	-->validateFigure-->{figure:figure}?false
+		-->API function:fetchDataEntries params:{figure:figure}
+		db operation "SELECT * from memoryMetadata where figure=?",params("s",$figure);
+				"SELECT * from memoryData where figure=?",params("s",$figure);
+			-->backend function summonData--> {metadata:metadata,data:data}
+				-->printSummonData(data)
+					-creates a chart with headings from metadata 
+					-fills in the chart with existing data 
+					-one row of inputs for new data 
+					-add button
+					-delete button
+---
+Add Button(+)
+---
+	-validate the chart input-->{figure,input0,input1,input2,input3}?false
+		-->API function:updateEntries:params:{figure,input0,input1,input2,input3}
+			-->backEnd operations updateData(data) --> return message
+				-->db operation "insert into memoryData values(?,?,?,?,?)",params("sssss")
+---
+Delete Button(-)
+---
+	
+	-->API function:deleteEntry:params{figure,value0}
+		-->backend operation removeEntries(figure,value0)
+			-removes the entry from the entries table returns completion message
+				db operation "DELETE FROM memoryData where figure=? and value0=?" params("ss",$figure,$value0)
+Editing Chart
+	-editing chart has all of the existing data with headings plus...
+	-one line of inputs plus a submit button (+)
+	-delete button for each of the entries(-)
+
